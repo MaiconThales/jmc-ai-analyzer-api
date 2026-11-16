@@ -2,8 +2,8 @@ name: jmc-ai-analyzer
 
 services:
   frontend:
-    image: ${FRONTEND_IMAGE:?FRONTEND_IMAGE must name a provisioned Angular image (prefer a digest)}
-    user: ${FRONTEND_USER:?FRONTEND_USER must be a non-root UID:GID supported by FRONTEND_IMAGE}
+    image: ${FRONTEND_IMAGE}
+    user: ${FRONTEND_USER}
     restart: unless-stopped
     read_only: true
     cap_drop:
@@ -11,20 +11,20 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-4200}:8080"
+      - "127.0.0.1:${FRONTEND_PORT}:8080"
     volumes:
       - ./docker/frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     tmpfs:
-      - /var/cache/nginx
-      - /var/run
-      - /tmp
+      - /var/cache/nginx:uid=101,gid=101,mode=0755
+      - /var/run:uid=101,gid=101,mode=0755
+      - /tmp:uid=101,gid=101,mode=1777
     depends_on:
       backend:
         condition: service_healthy
     networks:
       - app-net
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/healthz | grep -q '^ok$'"]
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0 | grep -q '^ok$'"]
       interval: 10s
       timeout: 3s
       start_period: 5s
@@ -44,30 +44,31 @@ services:
       - "8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-jmc_analyzer}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-jmc_analyzer}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set; see .env.example}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JFR_DATA_DIR: /data/jfr
-      MCP_ENABLED: ${MCP_ENABLED:-false}
-      MCP_JAR_PATH: ${MCP_JAR_PATH:-/opt/mcp/mcp-server-jmc.jar}
-      MCP_ARTIFACT_VERSION: ${MCP_ARTIFACT_VERSION:-}
-      MCP_JAR_SHA256: ${MCP_JAR_SHA256:-}
-      MCP_COMMAND: ${MCP_COMMAND:-java}
-      MCP_ARGUMENTS: ${MCP_ARGUMENTS:--jar,/opt/mcp/mcp-server-jmc.jar}
-      MCP_STARTUP_TIMEOUT: ${MCP_STARTUP_TIMEOUT:-5s}
-      ANALYSIS_MAX_CONCURRENT: ${ANALYSIS_MAX_CONCURRENT:-2}
-      ANALYSIS_STAGE_TIMEOUT: ${ANALYSIS_STAGE_TIMEOUT:-30s}
-      ANALYSIS_SESSION_TIMEOUT: ${ANALYSIS_SESSION_TIMEOUT:-2m}
-      FRONTEND_ALLOWED_ORIGINS: ${FRONTEND_ALLOWED_ORIGINS:-http://localhost:4200}
-      AI_ENABLED: ${AI_ENABLED:-false}
-      AI_PROVIDER: ${AI_PROVIDER:-provider-neutral}
-      AI_BASE_URL: ${AI_BASE_URL:-http://ai:11434/v1/chat/completions}
-      AI_MODEL: ${AI_MODEL:-default}
-      AI_TIMEOUT: ${AI_TIMEOUT:-30s}
-      AI_PROMPT_VERSION: ${AI_PROMPT_VERSION:-analysis-prompt-v1}
-      AI_API_KEY: ${AI_API_KEY:-}
+      MCP_ENABLED: ${MCP_ENABLED}
+      MCP_JAR_PATH: ${MCP_JAR_PATH}
+      MCP_ARTIFACT_VERSION: ${MCP_ARTIFACT_VERSION}
+      MCP_JAR_SHA256: ${MCP_JAR_SHA256}
+      MCP_COMMAND: ${MCP_COMMAND}
+      MCP_ARGUMENTS: ${MCP_ARGUMENTS}
+      MCP_STARTUP_TIMEOUT: ${MCP_STARTUP_TIMEOUT}
+      ANALYSIS_MAX_CONCURRENT: ${ANALYSIS_MAX_CONCURRENT}
+      ANALYSIS_STAGE_TIMEOUT: ${ANALYSIS_STAGE_TIMEOUT}
+      ANALYSIS_SESSION_TIMEOUT: ${ANALYSIS_SESSION_TIMEOUT}
+      FRONTEND_ALLOWED_ORIGINS: ${FRONTEND_ALLOWED_ORIGINS}
+      AI_ENABLED: ${AI_ENABLED}
+      AI_PROVIDER: ${AI_PROVIDER}
+      AI_BASE_URL: ${AI_BASE_URL}
+      AI_MODEL: ${AI_MODEL}
+      AI_TIMEOUT: ${AI_TIMEOUT}
+      AI_PROMPT_VERSION: ${AI_PROMPT_VERSION}
+      AI_API_KEY: ${AI_API_KEY}
     volumes:
       - jfr-data:/data/jfr:ro
+      - ${MCP_ARTIFACT_PATH}:/opt/mcp/mcp-server-jmc.jar:ro
     tmpfs:
       - /tmp
     depends_on:
@@ -76,10 +77,10 @@ services:
     networks:
       - app-net
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://127.0.0.1:8080/api/v1/health"]
-      interval: 10s
-      timeout: 5s
-      start_period: 30s
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || bash -c '</dev/tcp/localhost/8080' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
       retries: 10
     deploy:
       resources:
@@ -91,9 +92,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-jmc_analyzer}
-      POSTGRES_USER: ${POSTGRES_USER:-jmc_analyzer}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set; see .env.example}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pg-data:/var/lib/postgresql/data
     networks:
@@ -116,4 +117,3 @@ volumes:
 
 networks:
   app-net:
-    internal: true
