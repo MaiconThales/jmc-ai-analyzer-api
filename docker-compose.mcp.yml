@@ -1,9 +1,0 @@
-services:
-  backend:
-    environment:
-      MCP_ENABLED: "true"
-      MCP_JAR_PATH: ${MCP_JAR_PATH:?MCP_JAR_PATH is required for the mcp profile}
-      MCP_ARTIFACT_VERSION: ${MCP_ARTIFACT_VERSION:?MCP_ARTIFACT_VERSION is required for the mcp profile}
-      MCP_JAR_SHA256: ${MCP_JAR_SHA256:?MCP_JAR_SHA256 is required for the mcp profile}
-    volumes:
-      - ${MCP_ARTIFACT_PATH:?MCP_ARTIFACT_PATH must point to the provisioned versioned JAR}:/opt/mcp/mcp-server-jmc.jar:ro
