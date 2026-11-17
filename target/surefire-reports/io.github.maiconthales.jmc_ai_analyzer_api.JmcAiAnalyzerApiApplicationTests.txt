@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: io.github.maiconthales.jmc_ai_analyzer_api.JmcAiAnalyzerApiApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.579 s -- in io.github.maiconthales.jmc_ai_analyzer_api.JmcAiAnalyzerApiApplicationTests
