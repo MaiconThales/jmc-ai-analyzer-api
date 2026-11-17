@@ -75,7 +75,7 @@ sequenceDiagram
     participant TMP as Pasta temporária (${DATA_DIR}/api/tmp)
     participant BL as SeaweedFS (S3)
     participant DB as PostgreSQL
-    participant AP as AnalysisProcessor
+    participant AP as AnalysisProcessingService
 
     US->>TMP: streaming do multipart + SHA-256
     US->>BL: HeadObject recordings/<sha256>.jfr

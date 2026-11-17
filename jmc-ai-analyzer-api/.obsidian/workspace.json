@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "4cdefcf551ab5d3a",
+        "id": "2327261feb16f49e",
         "type": "tabs",
         "children": [
           {
-            "id": "6db5e7e7e54e55da",
+            "id": "a56689f3822d9e48",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "v0.1.0/10 Propostas de diagnóstico.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "10 Propostas de diagnóstico"
+              "title": "Nova aba"
             }
           }
         ]
@@ -99,7 +95,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "v0.1.0/10 Propostas de diagnóstico.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +113,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "v0.1.0/10 Propostas de diagnóstico.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +155,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "v0.1.0/10 Propostas de diagnóstico.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -188,12 +181,17 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "d1f8524aca948582",
+  "active": "a56689f3822d9e48",
   "lastOpenFiles": [
+    "v0.1.0/sedJxpVnO",
+    "v0.1.0/sedb3DMTE",
+    "v0.1.0/sedVzGS74",
+    "v0.1.0/sedHClCPy",
+    "v0.1.0/sedoIbDv2",
+    "v0.1.0/10 Propostas de diagnóstico.md",
     "v0.1.0/sedb5mVjW",
     "v0.1.0/sedtRvol1",
     "v0.1.0/08 Decisões e questões.md",
-    "v0.1.0/10 Propostas de diagnóstico.md",
     "v0.1.0/10 Propostas de diagnóstico.md.tmp.95007.7b0050362961",
     "v0.1.0/00 Índice.md",
     "v0.1.0/09 Armazenamento blob.md",
@@ -208,11 +206,6 @@
     "v0.1.0/01 Visão geral e escopo.md",
     "Arquivo bruto.md",
     "v0.1.0/08 Decisões e questões.md.tmp.95007.c1da7b6dec43",
-    "v0.1.0/07 Infraestrutura e qualidade.md.tmp.95007.07d4e1c1568f",
-    "v0.1.0/06 API.md.tmp.95007.51b5671a6bb1",
-    "v0.1.0/05 Modelo de dados.md.tmp.95007.c5baeaf8a4b0",
-    "v0.1.0/04 Extração JFR.md.tmp.95007.4171c92c1959",
-    "v0.1.0/03 Requisitos.md.tmp.95007.89068bd28e04",
     "Bem-vindo.md"
   ]
 }

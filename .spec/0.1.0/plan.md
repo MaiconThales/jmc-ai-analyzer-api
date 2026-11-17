@@ -58,54 +58,61 @@ O `pom.xml` também preenche `name`, `description` e `sonar.projectKey`, que hoj
 
 ```text
 io.github.maiconthales.jmc_ai_analyzer_api
-├── JmcAiAnalyzerApiApplication.java          (@SpringBootApplication, @EnableScheduling, @ConfigurationPropertiesScan)
+├── JmcAiAnalyzerApiApplication.java      (@SpringBootApplication, @EnableScheduling, @ConfigurationPropertiesScan)
 ├── system
-│   ├── config
-│   │   ├── UploadProperties, AnalysisProperties, BlobProperties, StorageProperties,
-│   │   │   RetentionProperties, DiagnosisProperties          (records @ConfigurationProperties @Validated)
-│   │   ├── AsyncConfig            (ThreadPoolTaskExecutor "analysisExecutor")
-│   │   ├── BlobStorageConfig      (S3Client)
-│   │   └── OpenApiConfig
-│   ├── controllers
-│   │   ├── AnalysisController     (/api/v1/analyses)
-│   │   ├── RecordingController    (/api/v1/recordings)
-│   │   ├── SoftwareController     (/api/v1/software)
-│   │   └── dto                    (records de request/response)
-│   ├── handlers
-│   │   ├── ApiExceptionHandler    (@RestControllerAdvice → ProblemDetail)
-│   │   ├── BlobStorageHealthIndicator
-│   │   └── exceções: ApiException (base, com ErrorCode), NotFoundException, NotReadyException,
-│   │       InvalidUploadException, StorageUnavailableException
-│   ├── enums
-│   │   └── AnalysisStatus, BatchStatus, MetricType, LockType, IoType, FindingSeverity,
-│   │       Priority, DiagnosisCategory, CoverageStatus, CoverageDomain, Environment, ErrorCode
-│   ├── entity                     (§4)
-│   ├── repository                 (Spring Data JPA, um por entidade raiz)
-│   └── service
-│       ├── UploadService, UploadValidator, SoftwareVersionResolver
-│       ├── BlobStorageService, TempFileService
-│       ├── AnalysisDispatcher, AnalysisProcessor, AnalysisResultWriter, BatchStatusService, RecoveryRunner
-│       ├── DashboardService, ConsolidationService, AppFrameResolver, HistoryService
-│       ├── SoftwareService, RetentionJob
-│       ├── jfr
-│       │   ├── JfrReader                       (carrega IItemCollection)
-│       │   ├── RecordingExtraction             (record com o resultado de todos os extratores)
-│       │   ├── extractors/  MetadataExtractor, CpuExtractor, HeapExtractor, GcExtractor,
-│       │   │                ThreadExtractor, LockExtractor, HotMethodExtractor, AllocationExtractor,
-│       │   │                ExceptionExtractor, IoExtractor, LeakExtractor, ThreadCpuExtractor
-│       │   ├── rules/       JmcRuleRunner, JmcMessageFormatter (populateMessage + sanitização)
-│       │   └── support/     SeriesDownsampler, TopNAccumulator, StackFrameCollector, JvmArgsParser
-│       └── diagnosis
-│           ├── DiagnosisService, CoverageService, HealthScoreCalculator
-│           ├── DiagnosisRule (interface), DiagnosisContext (record)
-│           ├── rules/  HeapPressureRule, GcPauseHighRule, AllocationRateHighRule, CpuSaturationRule,
-│           │           HotMethodDominantRule, LockContentionRule, ExceptionRateHighRule,
-│           │           SlowRemoteCallRule, ThreadGrowthRule, TieredStopLevelRule,
-│           │           ActiveProcessorCountRule, XmsXmxMismatchRule, RecordingCoverageRule
-│           └── JmcFindingTranslator  (traduções pt-BR por ruleId)
-├── mcp                                       (só package-info.java — WIP)
-└── ia                                        (só package-info.java — WIP)
+│   ├── config         @Configuration: AsyncConfig, BlobStorageConfig, ClockConfig, OpenApiConfig, WebConfig
+│   ├── properties     @ConfigurationProperties: UploadProperties, AnalysisProperties, BlobProperties,
+│   │                  StorageProperties, RetentionProperties, DiagnosisProperties
+│   ├── controllers    AnalysisController, RecordingController, SoftwareController
+│   ├── dto            DTOs HTTP: BatchResponse, RecordingStatusResponse, SoftwareResponse, SoftwareUpdateRequest,
+│   │   │              UploadRequest, HistoryItemResponse, DashboardDtos
+│   │   ├── jfr        RecordingExtraction, RecordingMetadata, DomainResults, RecordingSettings, ExtractionContext,
+│   │   │              TimedValue, JmcRulesResult, NotApplicableRule
+│   │   ├── diagnosis  DiagnosisContext, DiagnosisOutcome, CoverageResult, CoverageDomainSpec, JmcTranslation
+│   │   ├── dashboard  RecordingDataSet, ConsolidationInput
+│   │   └── processing ProcessingTarget, StoredFile, RecordingsUploadedEvent, BlobObject, RetentionResult
+│   ├── exceptions     ApiException (base, com ErrorCode), NotFoundException, NotReadyException,
+│   │                  InvalidUploadException, StorageUnavailableException, BlobNotFoundException,
+│   │                  JfrParseException, AnalysisInterruptedException
+│   ├── handlers       ApiExceptionHandler (@RestControllerAdvice → ProblemDetail)
+│   ├── components     @Component: UploadValidator, AnalysisDispatcher, RecoveryRunner, RetentionJob,
+│   │   │              BlobStorageHealthIndicator
+│   │   ├── jfr        RecordingAnalyzer, JmcRuleRunner
+│   │   ├── dashboard  RecordingDataLoader, AppFrameResolver
+│   │   └── diagnosis  JmcFindingTranslator, DiagnosisRule (interface)
+│   │       └── rules  HeapPressureRule, GcPauseHighRule, AllocationRateHighRule, CpuSaturationRule,
+│   │                  HotMethodDominantRule, LockContentionRule, ExceptionRateHighRule, SlowRemoteCallRule,
+│   │                  ThreadGrowthRule, TieredStopLevelRule, ActiveProcessorCountRule, XmsXmxMismatchRule,
+│   │                  RecordingCoverageRule
+│   ├── mapper         BatchMapper, SummaryMapper, DashboardMapper
+│   ├── services       somente *Service (@Service): UploadService, BatchCreationService, BlobStorageService,
+│   │   │              TempFileService, SoftwareService, RecordingStateService, BatchStatusService,
+│   │   │              BatchQueryService, HistoryService, AnalysisProcessingService, AnalysisPersistenceService
+│   │   ├── dashboard  DashboardService, ConsolidationService
+│   │   └── diagnosis  DiagnosisService, CoverageService
+│   ├── utils          utilitários estáticos, sem estado
+│   │   ├── jfr        EventView, JfrEvents, JfrFields, JfrEventTypes, StackFrames, FrameCounter,
+│   │   │   │          SeriesDownsampler, Stats, JvmArgsParser, JmcMessageFormatter
+│   │   │   └── extractors  MetadataExtractor, CpuExtractor, HeapExtractor, GcExtractor, ThreadExtractor,
+│   │   │                   LockExtractor, HotMethodExtractor, AllocationExtractor, ExceptionExtractor,
+│   │   │                   IoExtractor, LeakExtractor, ThreadCpuExtractor, SettingsExtractor
+│   │   └── diagnosis  AppFrames, Diagnoses, HealthScoreCalculator
+│   ├── enums          AnalysisStatus, BatchStatus, MetricType, LockType, IoType, FindingSeverity, Priority,
+│   │                  DiagnosisCategory, CoverageStatus, CoverageDomain, Environment, ErrorCode
+│   ├── entity         entidades JPA (§4)
+│   └── repository     Spring Data JPA
+├── mcp                só package-info.java (WIP)
+└── ia                 só package-info.java (WIP)
 ```
+
+**Regras de organização (D-18)**:
+- `properties` só tem `*Properties`; `config` só tem `@Configuration`.
+- `dto`, `exceptions`, `components` e `mapper` ficam no mesmo nível de `controllers`.
+- Toda classe com `Exception` no nome que seja uma exceção fica em `exceptions`. O `ApiExceptionHandler` é um handler e fica em `handlers`.
+- `services` só tem classes `*Service` anotadas com `@Service`.
+- Toda classe `@Component` fica em `components`; todo `*Mapper` fica em `mapper`.
+- Records internos (modelos de extração, diagnóstico, dashboard e processamento) ficam em subpacotes de `dto`; utilitários estáticos ficam em `utils`.
+- Subpacotes por assunto são permitidos (`jfr`, `diagnosis`, `dashboard`, `processing`).
 
 **Convenções**:
 - injeção por construtor (`@RequiredArgsConstructor`);
@@ -154,12 +161,12 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant AD as AnalysisDispatcher
-    participant AP as AnalysisProcessor
+    participant AP as AnalysisProcessingService
     participant BL as Blob
     participant JR as JfrReader + extratores
     participant RR as JmcRuleRunner
     participant DG as DiagnosisService/CoverageService
-    participant W as AnalysisResultWriter
+    participant W as AnalysisPersistenceService
     participant BS as BatchStatusService
 
     AD->>AP: submit(recordingId) no analysisExecutor (com timeout)
@@ -231,7 +238,7 @@ O `RetentionJob` roda com `@Scheduled(cron = "${app.retention.cron}")`:
   - `(recording_id, rank)` nas tabelas de top-N;
   - `rule_finding(recording_id, severity)`, `diagnosis_item(recording_id, priority)`;
   - `analysis_batch(software_id, created_at desc)` e `(created_at desc)`.
-- **Gravação atômica**: um único `@Transactional` no `AnalysisResultWriter`.
+- **Gravação atômica**: um único `@Transactional` no `AnalysisPersistenceService`.
 
 ### 4.3. Migrações Flyway
 
@@ -330,7 +337,7 @@ app:
 
 ## 7. API — implementação
 
-- Controllers só traduzem HTTP ↔ serviço; DTOs são `record`s em `controllers.dto`.
+- Controllers só traduzem HTTP ↔ serviço; DTOs são `record`s em `dto`.
 - Validação com Bean Validation (`@Pattern` para o software, `@Min`/`@Max` para `topN` e `retentionDays`), mapeada para `INVALID_PARAMETER`.
 - **`ApiExceptionHandler`** devolve `ProblemDetail` com a propriedade `code` e trata:
   - `ApiException` (com `ErrorCode`);
@@ -359,7 +366,7 @@ app:
 | `api` | build | `8080:8080` | `${DATA_DIR}/api/logs:/app/logs`, `${DATA_DIR}/api/tmp:/app/tmp` | `/actuator/health` |
 | `mcp`, `frontend` | — | — | `${DATA_DIR}/<serviço>/` | blocos comentados (WIP) |
 
-- `api` usa `depends_on` com `condition: service_healthy` para `postgres` e `blob`, e limite de memória `${API_MEMORY_LIMIT:-6g}`.
+- `api` usa `depends_on` com `condition: service_healthy` para `postgres` e `blob`, e limite de memória `${API_MEMORY_LIMIT:-3g}`.
 - **Sem *named volumes*.** `docker-data/` e `.env` ficam no `.gitignore`.
 - `docker-compose.debug.yml` (opcional) expõe 5432 e 8333 em `127.0.0.1`.
 - `scripts/init-data-dirs.sh` cria a árvore de `${DATA_DIR}` com as permissões certas.
@@ -388,7 +395,7 @@ APP_ANALYSIS_MAX_CONCURRENT=2
 APP_ANALYSIS_TIMEOUT=10m
 APP_RETENTION_DEFAULT_DAYS=90
 APP_RETENTION_CRON=0 0 3 * * *
-API_MEMORY_LIMIT=6g
+API_MEMORY_LIMIT=3g
 JAVA_OPTS=-XX:MaxRAMPercentage=75
 ```
 
@@ -426,7 +433,7 @@ Arquivos de falha: um `.jfr` truncado (gerado no teste a partir de um exemplo) e
 - Exclusões:
   - `JmcAiAnalyzerApiApplication`;
   - `**/mcp/**` e `**/ia/**`;
-  - `**/config/*Properties`.
+  - `**/properties/**`.
 - `lombok.config` com `lombok.addLombokGeneratedAnnotation = true` e `config.stopBubbling = true`.
 
 ### 9.3. Sonar
@@ -456,7 +463,23 @@ Arquivos de falha: um `.jfr` truncado (gerado no teste a partir de um exemplo) e
 | Eventos extras úteis | `OldObjectSample`, `ThreadCPULoad`, `SafepointBegin`, `NativeMethodSample` |
 | Dados sensíveis | `InitialEnvironmentVariable`, `InitialSystemProperty`, `SystemProcess` |
 
-**Pendente**: medir a memória com um `.jfr` grande (T-02.3) e confirmar a versão e o health check do SeaweedFS (T-02.2).
+### 10.1. Medições feitas na implementação
+
+| Item | Resultado |
+|---|---|
+| SeaweedFS (T-02.2) | imagem fixada em `chrislusf/seaweedfs:4.52`; `server -s3 -dir=/data -s3.config=... -ip.bind=0.0.0.0`; health em `GET :8333/healthz`; envio simples, multipart, listagem e exclusão validados com o AWS SDK v2 (`WHEN_REQUIRED`) |
+| Memória (T-02.3) | gravações reais densas de ~240 MB: **1–1,5 GB de heap** (3–5× o arquivo), 3–5 s de processamento. A estimativa de 20× vinha do arquivo de 1,5 MB, dominado por custo fixo |
+| Concatenação de `.jfr` | não serve para medir: o JMC descarta chunks repetidos |
+
+**Decisão do autor (2026-11-17)**: manter **128 MB** por arquivo e reduzir `API_MEMORY_LIMIT` para **3 GB** (heap de ~2,25 GB com `MaxRAMPercentage=75`: até 2 arquivos de 128 MB em paralelo, ~0,8 GB cada, mais a aplicação).
+
+### 10.2. Ajustes feitos durante a implementação
+
+- `io_hotspot.max_ms`: nova coluna, necessária para a regra `SLOW_REMOTE_CALL` (leitura > 1 s).
+- `sha256` como `VARCHAR(64)` (o `CHAR` não valida no Hibernate).
+- Health check do container com uma classe Java compilada no build (a imagem JRE não tem curl nem compilador).
+- Locale `en_US` e fuso UTC fixados no `main`, no Dockerfile e no Surefire (mensagens do JMC determinísticas).
+- Objetos órfãos do blob só são apagados pela retenção depois de 1 h, para não atingir um upload em andamento.
 
 ---
 
@@ -468,19 +491,20 @@ Arquivos de falha: um `.jfr` truncado (gerado no teste a partir de um exemplo) e
 | D-02 | Agregados + séries reduzidas + top-N | banco enxuto; o detalhe fica no `.jfr` |
 | D-03 | `.jfr` no SeaweedFS (S3) | reprocessamento futuro; API sem estado; servidor S3 trocável |
 | D-04 | Consolidado calculado na consulta | nunca fica desatualizado |
-| D-05 | DTOs em `controllers.dto` | segue a lista de subpacotes do Arquivo bruto |
+| D-05 | DTOs em `dto` (substituída pela D-18) | — |
 | D-06 | Spring Boot 4.1.2 | mantido do `pom.xml` |
 | D-07 | Processamento assíncrono | arquivos grandes; evitar timeout HTTP |
 | D-08 | SDD em `.spec/0.1.0/` na raiz do repositório | histórico do projeto |
 | D-09 | Todo dado de container em bind mount | nada se perde ao recriar |
 | D-10 | SonarQube local, sem CI | resposta do autor |
-| D-11 | Limites 20 / 128 MB / 1 GB / 6 GB (**provisórios**) | ~1,5 MB/min e heap ~20× |
+| D-11 | Limites 20 / 128 MB / 1 GB / 3 GB | medição: heap de 3–5× o arquivo (T-02.3) |
 | D-12 | Software obrigatório + retenção em dias por software | resposta do autor |
 | D-13 | Swagger na v0.1.0 | resposta do autor |
 | D-14 | Fixtures = `examples files/` + gravações sintéticas | resposta do autor |
 | D-15 | Severidades do JMC sem `CRITICAL` | resultado do spike |
 | D-16 | P-01, P-02, P-03, P-04, P-05a, P-05b e P-07 na v0.1.0 | aprovação do autor |
 | D-17 | `diagnosis_item.location` como `jsonb` | precisa guardar a pilha para o `appFrame` |
+| D-18 | Pacotes `properties`, `dto`, `exceptions`, `components`, `mapper`, `services` (só `*Service`) e `utils` no mesmo nível de `controllers` | pedido do autor em 2026-11-17 |
 
 ## 12. Riscos
 

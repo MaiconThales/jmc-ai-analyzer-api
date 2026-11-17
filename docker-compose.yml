@@ -1,0 +1,85 @@
+# Todos os dados ficam em ${DATA_DIR} na máquina real (bind mounts). Não há named volumes:
+# reiniciar, recriar ou rodar "docker compose down -v" não apaga nada.
+# Antes do primeiro "up": ./scripts/init-data-dirs.sh
+
+name: jmc-ai-analyzer
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jmc_analyzer}
+      POSTGRES_USER: ${POSTGRES_USER:-jmc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - ${DATA_DIR:-./docker-data}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  blob:
+    image: chrislusf/seaweedfs:4.52
+    restart: unless-stopped
+    command: ["server", "-s3", "-dir=/data", "-s3.config=/etc/seaweedfs/s3.json", "-ip.bind=0.0.0.0"]
+    volumes:
+      - ${DATA_DIR:-./docker-data}/seaweedfs:/data
+      - ./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      args:
+        APP_UID: ${APP_UID:-1000}
+        APP_GID: ${APP_GID:-1000}
+    image: jmc-ai-analyzer-api:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      blob:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-jmc_analyzer}
+      POSTGRES_USER: ${POSTGRES_USER:-jmc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BLOB_ENDPOINT: http://blob:8333
+      BLOB_BUCKET: ${BLOB_BUCKET:-jfr-recordings}
+      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY:?defina BLOB_ACCESS_KEY no .env}
+      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY:?defina BLOB_SECRET_KEY no .env}
+      APP_UPLOAD_MAX_FILES: ${APP_UPLOAD_MAX_FILES:-20}
+      APP_UPLOAD_MAX_FILE_SIZE: ${APP_UPLOAD_MAX_FILE_SIZE:-128MB}
+      APP_UPLOAD_MAX_REQUEST_SIZE: ${APP_UPLOAD_MAX_REQUEST_SIZE:-1GB}
+      APP_ANALYSIS_MAX_CONCURRENT: ${APP_ANALYSIS_MAX_CONCURRENT:-2}
+      APP_ANALYSIS_TIMEOUT: ${APP_ANALYSIS_TIMEOUT:-10m}
+      APP_RETENTION_DEFAULT_DAYS: ${APP_RETENTION_DEFAULT_DAYS:-90}
+      APP_RETENTION_CRON: ${APP_RETENTION_CRON:-0 0 3 * * *}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+    volumes:
+      - ${DATA_DIR:-./docker-data}/api/logs:/app/logs
+      - ${DATA_DIR:-./docker-data}/api/tmp:/app/tmp
+    deploy:
+      resources:
+        limits:
+          memory: ${API_MEMORY_LIMIT:-3g}
+
+  # --- Futuro (WIP): seguem a mesma regra, qualquer estado em ${DATA_DIR}/<serviço>/ ---
+  # mcp:
+  #   image: jmc-ai-analyzer-mcp:<versão>
+  #   depends_on: [api]
+  #   volumes:
+  #     - ${DATA_DIR:-./docker-data}/mcp:/data
+  # frontend:
+  #   image: jmc-ai-analyzer-frontend:<versão>
+  #   depends_on: [api]
+  #   ports:
+  #     - "${FRONTEND_PORT:-4200}:80"

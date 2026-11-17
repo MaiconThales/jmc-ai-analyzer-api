@@ -1,0 +1,22 @@
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Ambiente e dados locais
+.env
+docker-data/
+docker/seaweedfs/s3.json
+
+# Obsidian (estado local do editor)
+jmc-ai-analyzer-api/.obsidian/workspace.json
+
+# SO
+.DS_Store

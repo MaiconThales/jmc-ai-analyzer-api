@@ -59,7 +59,7 @@ Um bloco `diagnosis[]` no **topo** dos dashboards (por gravação e consolidado)
 
 ## P-02 — Catálogo de regras próprias em português
 
-O JMC devolve as mensagens em inglês e não conhece o contexto de cada software. Um catálogo em `system.service.diagnosis` (uma classe por regra, todas pequenas e testáveis) usa os dados já extraídos.
+O JMC devolve as mensagens em inglês e não conhece o contexto de cada software. Um catálogo em `system.components.diagnosis.rules` (uma classe por regra, todas pequenas e testáveis) usa os dados já extraídos.
 
 | Regra | Dispara quando (padrão configurável) | Ação sugerida |
 |---|---|---|

@@ -44,8 +44,8 @@ Voltar: [[00 Índice]]
 
 ### D-05 — DTOs em controllers.dto
 
-> [!success] Decisão
-> Os DTOs são `record`s dentro de `controllers.dto`, para seguir a lista de subpacotes do [[Arquivo bruto]].
+> [!failure] Substituída pela [[#D-18 — Organização de pacotes|D-18]]
+> Os DTOs ficavam em `controllers.dto`; agora ficam em `dto`, no mesmo nível de `controllers`.
 
 ### D-06 — Spring Boot 4.1.2
 
@@ -79,10 +79,9 @@ Voltar: [[00 Índice]]
 
 ### D-11 — Limites de upload
 
-> [!warning] Decisão proposta — validar (Q2)
-> **20 arquivos por lote, 128 MB por arquivo, 1 GB por requisição**, `max-concurrent = 2` e **6 GB** de memória para a `api`.
-> **Base**: os exemplos têm ~1,5 MB por minuto (128 MB ≈ 1h30 de gravação), e o spike mostrou heap de ~20× o tamanho do arquivo.
-> **Pendente**: medir com um `.jfr` grande (> 50 MB) antes de fechar os valores.
+> [!success] Decisão (Q2, confirmada em 2026-11-17)
+> **20 arquivos por lote, 128 MB por arquivo, 1 GB por requisição**, `max-concurrent = 2` e **3 GB** de memória para a `api`.
+> **Medido em 2026-11-17**: gravações densas de ~240 MB usam 1–1,5 GB de heap (3–5×), não 20×. Escolhido: 128 MB por arquivo e 3 GB para a API.
 
 ### D-12 — Software e retenção por dias (Q3)
 
@@ -126,6 +125,18 @@ Voltar: [[00 Índice]]
 > [!success] Decisão (tomada ao gerar o SDD)
 > `diagnosis_item.location` é `jsonb` (`{thread?, target?, stackFrames?}`), e não `text`, porque o `appFrame` é calculado na consulta a partir da pilha. `recording_summary` também ganha `suggested_command`, que vem da cobertura.
 
+### D-18 — Organização de pacotes
+
+> [!success] Decisão (2026-11-17)
+> - `properties`: só `*Properties`; `config`: só `@Configuration`.
+> - `dto`, `exceptions`, `components` e `mapper` no mesmo nível de `controllers`.
+> - Exceções em `exceptions`; o `ApiExceptionHandler` continua em `handlers` (é um handler).
+> - `services`: só classes `*Service`. Por isso `BatchCreationService` virou `BatchCreationService`, `AnalysisProcessingService` virou `AnalysisProcessingService` e `AnalysisPersistenceService` virou `AnalysisPersistenceService`.
+> - `@Component` em `components` (inclusive as 13 regras de diagnóstico); `*Mapper` em `mapper`.
+> - Records internos em subpacotes de `dto` (`jfr`, `diagnosis`, `dashboard`, `processing`); utilitários estáticos em `utils`.
+> - Subpacotes por assunto permitidos.
+> Árvore completa em [[02 Arquitetura#Estrutura de pacotes]].
+
 ## Questões respondidas
 
 - [x] **Q1 — Sonar** → existe SonarQube → [[#D-10 — SonarQube local, sem CI (Q1 e Q5)|D-10]]
@@ -137,7 +148,7 @@ Voltar: [[00 Índice]]
 
 ## Pendências
 
-- [ ] Validar os limites de [[#D-11 — Limites de upload|D-11]] com um `.jfr` grande.
+- [x] Medir os limites de [[#D-11 — Limites de upload|D-11]] com um `.jfr` grande → 128 MB e 3 GB.
 - [x] Decidir quais propostas de [[10 Propostas de diagnóstico]] entram na v0.1.0 → [[#D-16 — Propostas de diagnóstico aprovadas|D-16]].
 
 ## Próximo passo

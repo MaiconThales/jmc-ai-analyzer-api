@@ -91,7 +91,7 @@ ${DATA_DIR}/                 # padrão ./docker-data (no .gitignore)
 | `APP_ANALYSIS_MAX_CONCURRENT` | `2` | `app.analysis.max-concurrent` |
 | `APP_ANALYSIS_TIMEOUT` | `10m` | `app.analysis.timeout` |
 | `JAVA_OPTS` | `-XX:MaxRAMPercentage=75` | JVM da API |
-| `API_MEMORY_LIMIT` | `6g` | `deploy.resources.limits.memory` da `api` |
+| `API_MEMORY_LIMIT` | `3g` | `deploy.resources.limits.memory` da `api` |
 | `APP_RETENTION_DEFAULT_DAYS` | `90` | `app.retention.default-days` |
 | `APP_RETENTION_CRON` | `0 0 3 * * *` | `app.retention.cron` |
 
@@ -125,7 +125,7 @@ ${DATA_DIR}/                 # padrão ./docker-data (no .gitignore)
 - Exclusões permitidas:
   - `JmcAiAnalyzerApiApplication`;
   - `**/mcp/**` e `**/ia/**` (só `package-info`);
-  - `**/config/*Properties` (records sem lógica).
+  - `**/properties/**` (records sem lógica).
 - Toda exclusão nova precisa estar justificada em [[08 Decisões e questões]].
 
 ## Sonar

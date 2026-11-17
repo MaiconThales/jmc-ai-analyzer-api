@@ -33,7 +33,7 @@ Validações, todas feitas **antes** de aceitar o lote:
 - [ ] tamanho da requisição ≤ `app.upload.max-request-size` (padrão **1 GB**) → senão `FILE_TOO_LARGE`.
 
 > [!info] Por que esses limites (resposta da Q2)
-> Os exemplos reais têm ~1,5 MB por minuto de gravação. **128 MB** cobre cerca de 1h30 de gravação contínua por arquivo. Com o parser usando ~20× o tamanho do arquivo em heap, isso dá ~2,5 GB por arquivo; com `max-concurrent = 2`, a API precisa de **~6 GB** de memória. Os valores ficam a validar com um arquivo grande. Ver [[08 Decisões e questões#D-11 — Limites de upload]].
+> Os exemplos reais têm ~1,5 MB por minuto de gravação: **128 MB** cobre cerca de 1h30 de gravação contínua por arquivo. Medido em gravações densas de ~240 MB, o parser usa 3–5× o tamanho do arquivo em heap; com `max-concurrent = 2`, a API usa **3 GB** de memória. Ver [[08 Decisões e questões#D-11 — Limites de upload]].
 
 > [!warning] Tudo ou nada
 > Se qualquer validação falhar, nada é persistido. Objetos que já tinham sido enviados ao blob durante a requisição são apagados, a menos que o mesmo SHA-256 já existisse antes. Se o blob estiver fora do ar, a resposta é `503 STORAGE_UNAVAILABLE`.

@@ -40,7 +40,7 @@ flowchart LR
     U[Cliente / futuro front-end] -- "POST multipart .jfr" --> API
     subgraph API [api — Spring Boot]
         C[controllers] --> S[service]
-        S --> P["service.jfr<br/>extratores JMC"]
+        S --> P["components.jfr + utils.jfr<br/>extratores JMC"]
         S --> R[repository]
     end
     S -- "S3: grava .jfr" --> V[(blob SeaweedFS)]

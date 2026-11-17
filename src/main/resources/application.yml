@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: jmc-ai-analyzer-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/jmc_analyzer}
+    username: ${POSTGRES_USER:jmc}
+    password: ${POSTGRES_PASSWORD:jmc}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 500
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+  servlet:
+    multipart:
+      max-file-size: ${app.upload.max-file-size}
+      max-request-size: ${app.upload.max-request-size}
+      file-size-threshold: 0
+      location: ${app.storage.tmp-dir}
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: 8080
+  tomcat:
+    max-swallow-size: -1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    org.openjdk.jmc: ERROR
+
+app:
+  upload:
+    max-files: ${APP_UPLOAD_MAX_FILES:20}
+    max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:128MB}
+    max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:1GB}
+  analysis:
+    max-concurrent: ${APP_ANALYSIS_MAX_CONCURRENT:2}
+    timeout: ${APP_ANALYSIS_TIMEOUT:10m}
+    parser-version: "@project.version@+jmc-@jmc.version@"
+  storage:
+    tmp-dir: ${APP_TMP_DIR:${java.io.tmpdir}/jmc-analyzer}
+  blob:
+    endpoint: ${BLOB_ENDPOINT:http://localhost:8333}
+    bucket: ${BLOB_BUCKET:jfr-recordings}
+    access-key: ${BLOB_ACCESS_KEY:dev-access-key}
+    secret-key: ${BLOB_SECRET_KEY:dev-secret-key}
+  retention:
+    default-days: ${APP_RETENTION_DEFAULT_DAYS:90}
+    cron: ${APP_RETENTION_CRON:0 0 3 * * *}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+logging:
+  file:
+    name: /app/logs/jmc-ai-analyzer-api.log
+  logback:
+    rollingpolicy:
+      max-history: 14
+      file-name-pattern: /app/logs/jmc-ai-analyzer-api.%d{yyyy-MM-dd}.%i.log

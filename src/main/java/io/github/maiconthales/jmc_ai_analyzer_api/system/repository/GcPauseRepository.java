@@ -1,0 +1,14 @@
+package io.github.maiconthales.jmc_ai_analyzer_api.system.repository;
+
+import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.GcPause;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GcPauseRepository extends JpaRepository<GcPause, Long> {
+
+	List<GcPause> findByRecordingIdAndRankLessThanEqualOrderByRankAsc(UUID recordingId, int rank);
+
+	List<GcPause> findByRecordingIdIn(Collection<UUID> recordingIds);
+}

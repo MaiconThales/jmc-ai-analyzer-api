@@ -47,28 +47,63 @@ Definida em [[Arquivo bruto]]. Os subpacotes só existem quando forem necessári
 
 ```text
 io.github.maiconthales.jmc_ai_analyzer_api
-├── JmcAiAnalyzerApiApplication.java
+├── JmcAiAnalyzerApiApplication.java      (@SpringBootApplication, @EnableScheduling, @ConfigurationPropertiesScan)
 ├── system
-│   ├── config        → BlobProperties, StorageProperties, UploadProperties, AnalysisProperties, RetentionProperties, AsyncConfig, BlobStorageConfig, OpenApiConfig
-│   ├── controllers   → AnalysisController, RecordingController, SoftwareController
-│   │   └── dto       → records de request/response
-│   ├── handlers      → ApiExceptionHandler (@RestControllerAdvice) + exceções de negócio
-│   ├── enums         → AnalysisStatus, BatchStatus, MetricType, LockType, IoType, FindingSeverity, ErrorCode
-│   ├── entity        → entidades JPA (ver [[05 Modelo de dados]])
-│   ├── service
-│   │   ├── UploadService, BlobStorageService, AnalysisProcessor,
-│   │   │   DiagnosisService, CoverageService, AppFrameResolver,
-│   │   │   DashboardService, ConsolidationService, BatchStatusService,
-│   │   │   SoftwareService, RetentionJob
-│   │   ├── jfr       → JfrReader + um extrator por domínio (ver [[04 Extração JFR]])
-│   │   └── diagnosis → DiagnosisRule (interface) + uma classe por regra do catálogo e traduções dos achados do JMC (ver [[10 Propostas de diagnóstico]])
-│   └── repository    → Spring Data JPA
-├── mcp               → WIP: só package-info.java
-└── ia                → WIP: só package-info.java
+│   ├── config         @Configuration: AsyncConfig, BlobStorageConfig, ClockConfig, OpenApiConfig, WebConfig
+│   ├── properties     @ConfigurationProperties: UploadProperties, AnalysisProperties, BlobProperties,
+│   │                  StorageProperties, RetentionProperties, DiagnosisProperties
+│   ├── controllers    AnalysisController, RecordingController, SoftwareController
+│   ├── dto            DTOs HTTP: BatchResponse, RecordingStatusResponse, SoftwareResponse, SoftwareUpdateRequest,
+│   │   │              UploadRequest, HistoryItemResponse, DashboardDtos
+│   │   ├── jfr        RecordingExtraction, RecordingMetadata, DomainResults, RecordingSettings, ExtractionContext,
+│   │   │              TimedValue, JmcRulesResult, NotApplicableRule
+│   │   ├── diagnosis  DiagnosisContext, DiagnosisOutcome, CoverageResult, CoverageDomainSpec, JmcTranslation
+│   │   ├── dashboard  RecordingDataSet, ConsolidationInput
+│   │   └── processing ProcessingTarget, StoredFile, RecordingsUploadedEvent, BlobObject, RetentionResult
+│   ├── exceptions     ApiException (base, com ErrorCode), NotFoundException, NotReadyException,
+│   │                  InvalidUploadException, StorageUnavailableException, BlobNotFoundException,
+│   │                  JfrParseException, AnalysisInterruptedException
+│   ├── handlers       ApiExceptionHandler (@RestControllerAdvice → ProblemDetail)
+│   ├── components     @Component: UploadValidator, AnalysisDispatcher, RecoveryRunner, RetentionJob,
+│   │   │              BlobStorageHealthIndicator
+│   │   ├── jfr        RecordingAnalyzer, JmcRuleRunner
+│   │   ├── dashboard  RecordingDataLoader, AppFrameResolver
+│   │   └── diagnosis  JmcFindingTranslator, DiagnosisRule (interface)
+│   │       └── rules  HeapPressureRule, GcPauseHighRule, AllocationRateHighRule, CpuSaturationRule,
+│   │                  HotMethodDominantRule, LockContentionRule, ExceptionRateHighRule, SlowRemoteCallRule,
+│   │                  ThreadGrowthRule, TieredStopLevelRule, ActiveProcessorCountRule, XmsXmxMismatchRule,
+│   │                  RecordingCoverageRule
+│   ├── mapper         BatchMapper, SummaryMapper, DashboardMapper
+│   ├── services       somente *Service (@Service): UploadService, BatchCreationService, BlobStorageService,
+│   │   │              TempFileService, SoftwareService, RecordingStateService, BatchStatusService,
+│   │   │              BatchQueryService, HistoryService, AnalysisProcessingService, AnalysisPersistenceService
+│   │   ├── dashboard  DashboardService, ConsolidationService
+│   │   └── diagnosis  DiagnosisService, CoverageService
+│   ├── utils          utilitários estáticos, sem estado
+│   │   ├── jfr        EventView, JfrEvents, JfrFields, JfrEventTypes, StackFrames, FrameCounter,
+│   │   │   │          SeriesDownsampler, Stats, JvmArgsParser, JmcMessageFormatter
+│   │   │   └── extractors  MetadataExtractor, CpuExtractor, HeapExtractor, GcExtractor, ThreadExtractor,
+│   │   │                   LockExtractor, HotMethodExtractor, AllocationExtractor, ExceptionExtractor,
+│   │   │                   IoExtractor, LeakExtractor, ThreadCpuExtractor, SettingsExtractor
+│   │   └── diagnosis  AppFrames, Diagnoses, HealthScoreCalculator
+│   ├── enums          AnalysisStatus, BatchStatus, MetricType, LockType, IoType, FindingSeverity, Priority,
+│   │                  DiagnosisCategory, CoverageStatus, CoverageDomain, Environment, ErrorCode
+│   ├── entity         entidades JPA (§4)
+│   └── repository     Spring Data JPA
+├── mcp                só package-info.java (WIP)
+└── ia                 só package-info.java (WIP)
 ```
 
-> [!note] DTOs dentro de `controllers.dto`
-> O [[Arquivo bruto]] não lista um subpacote `dto`. Para não criar uma camada nova, os DTOs HTTP ficam em `controllers.dto` como `record`s. Ver [[08 Decisões e questões#D-05 — DTOs em controllers.dto]].
+**Regras de organização (D-18)**:
+- `properties` só tem `*Properties`; `config` só tem `@Configuration`.
+- `dto`, `exceptions`, `components` e `mapper` ficam no mesmo nível de `controllers`.
+- Toda classe com `Exception` no nome que seja uma exceção fica em `exceptions`. O `ApiExceptionHandler` é um handler e fica em `handlers`.
+- `services` só tem classes `*Service` anotadas com `@Service`.
+- Toda classe `@Component` fica em `components`; todo `*Mapper` fica em `mapper`.
+- Records internos (modelos de extração, diagnóstico, dashboard e processamento) ficam em subpacotes de `dto`; utilitários estáticos ficam em `utils`.
+- Subpacotes por assunto são permitidos (`jfr`, `diagnosis`, `dashboard`, `processing`).
+
+Ver [[08 Decisões e questões#D-18 — Organização de pacotes]].
 
 ## Componentes do `system`
 
@@ -81,7 +116,7 @@ flowchart TB
     AP --> JS
     JS -- S3 --> BL[(SeaweedFS)]
     US --> REPO[(repositories)]
-    US -- "após commit" --> AP[AnalysisProcessor]
+    US -- "após commit" --> AP[AnalysisProcessingService]
     AP --> JR[JfrReader]
     JR --> EX["Extratores<br/>CPU · Heap · GC · Threads · Locks<br/>HotMethods · Alocação · Exceções · I/O · Regras"]
     AP --> DG[DiagnosisService]
@@ -98,7 +133,7 @@ flowchart TB
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `UploadService`        | Valida o lote, faz streaming para um temporário calculando o SHA-256, envia ao blob via `BlobStorageService`, cria `analysis_batch` e `jfr_recording` e agenda o processamento **depois do commit** da transação. |
 | `BlobStorageService`   | Fala com o SeaweedFS pela API S3: garante o bucket, deduplica por `HeadObject`, envia e baixa `recordings/<sha256>.jfr`. Ver [[09 Armazenamento blob]].      |
-| `AnalysisProcessor`    | Roda no executor limitado: marca `PROCESSING`, chama o `JfrReader`, persiste os resultados numa transação e marca `COMPLETED` ou `FAILED`.                    |
+| `AnalysisProcessingService`    | Roda no executor limitado: marca `PROCESSING`, chama o `JfrReader`, persiste os resultados numa transação e marca `COMPLETED` ou `FAILED`.                    |
 | `JfrReader`            | Carrega a gravação com `JfrLoaderToolkit` e repassa os `IItemCollection` aos extratores.                                                                      |
 | Extratores             | Um por domínio. Cada um é uma função pura `IItemCollection → resultado`, fácil de testar.                                                                     |
 | `BatchStatusService`   | Recalcula o `BatchStatus` (ver [[03 Requisitos#RF-03 — Processamento assíncrono]]).                                                                           |
@@ -120,7 +155,7 @@ sequenceDiagram
     participant US as UploadService
     participant FS as Blob (SeaweedFS, S3)
     participant DB as PostgreSQL
-    participant AP as AnalysisProcessor (async)
+    participant AP as AnalysisProcessingService (async)
 
     C->>AC: POST /api/v1/analyses (files[])
     AC->>US: upload(files)

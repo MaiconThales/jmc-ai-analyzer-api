@@ -1,0 +1,9 @@
+target/
+docker-data/
+.git/
+.idea/
+.spec/
+jmc-ai-analyzer-api/
+examples files/
+*.jfr
+.env
