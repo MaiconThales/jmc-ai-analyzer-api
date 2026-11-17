@@ -28,7 +28,7 @@ O futuro `mcp` e o `ia` também vão ler o `.jfr` pelo blob, sem montar a pasta 
 - **Licença**: Apache 2.0.
 - **Modo**: `server -s3`, que sobe master, volume, filer e gateway S3 num processo só. É suficiente para a v0.1.0.
 - **Dados**: `/data` dentro do container → `${DATA_DIR}/seaweedfs` no host.
-- **Credenciais S3**: arquivo `s3.json`, montado somente leitura e gerado a partir de `BLOB_ACCESS_KEY` / `BLOB_SECRET_KEY` do `.env`. Nunca versionado com valores reais.
+- **Credenciais S3**: o `s3.json` é gerado dentro do container, na inicialização, a partir de `BLOB_ACCESS_KEY` / `BLOB_SECRET_KEY` do `.env`. Nenhum arquivo de credenciais fica no host ou no repositório.
 - **Portas**: `8333` (S3) **só na rede interna** do Compose. Para depurar no host, há um override opcional (`docker-compose.debug.yml`) que expõe a porta em `127.0.0.1`.
 
 > [!warning] Validar no spike

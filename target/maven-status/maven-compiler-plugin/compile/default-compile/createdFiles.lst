@@ -18,6 +18,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/HotMethod
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/BatchResponse.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/diagnosis/HealthScoreCalculator$1.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/enums/ErrorCode.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/dto/ConfigResponse$Dashboard.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/properties/DiagnosisProperties.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/enums/CoverageStatus.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos$AllocationView.class
@@ -48,6 +49,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/services/AnalysisProcessingSer
 io/github/maiconthales/jmc_ai_analyzer_api/system/enums/CoverageDomain.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/properties/BlobProperties.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/diagnosis/DiagnosisOutcome.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/controllers/ConfigController.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/diagnosis/CoverageDomainSpec.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/enums/FindingSeverity.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/components/diagnosis/rules/SlowRemoteCallRule.class
@@ -72,6 +74,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/services/diagnosis/DiagnosisSe
 io/github/maiconthales/jmc_ai_analyzer_api/system/properties/RetentionProperties.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/ThreadExtractor.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/components/BlobStorageHealthIndicator.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/dto/ConfigResponse$Retention.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/jfr/DomainResults$HotMethods.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/CpuExtractor.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/repository/LockContentionRepository.class
@@ -91,6 +94,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/config/AsyncConfig.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/config/ClockConfig.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos$HotMethodsView.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/exceptions/AnalysisInterruptedException.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/dto/ConfigResponse$Upload.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/enums/Environment.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/AllocationExtractor.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/AllocationExtractor$Acc.class
@@ -125,6 +129,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/exceptions/InvalidUploadExcept
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/EventView.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos$JvmView.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/extractors/ThreadCpuExtractor.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/services/ConfigService.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/handlers/ApiExceptionHandler.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/utils/diagnosis/Diagnoses.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos$CoverageView.class
@@ -168,6 +173,7 @@ io/github/maiconthales/jmc_ai_analyzer_api/system/utils/jfr/JvmArgsParser.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/repository/CoverageItemRepository.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/jfr/DomainResults$Locks.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/jfr/DomainResults$Io.class
+io/github/maiconthales/jmc_ai_analyzer_api/system/dto/ConfigResponse.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/entity/CoverageItem.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/diagnosis/JmcTranslation.class
 io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos$LocationView.class

@@ -39,10 +39,11 @@ flowchart LR
 | Serviço | Imagem | Portas | Mapeamento no host (bind mount) | Health |
 |---|---|---|---|---|
 | `postgres` | `postgres:17-alpine` | **não exposta** | `${DATA_DIR}/postgres:/var/lib/postgresql/data` | `pg_isready` |
-| `blob` | `chrislusf/seaweedfs:<versão fixa>` | **não exposta** (8333 interna) | `${DATA_DIR}/seaweedfs:/data` e `./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro` | ver [[09 Armazenamento blob#SeaweedFS]] |
+| `data-init` | `alpine:3.22` (roda e termina) | — | `${DATA_DIR}:/data` | cria as pastas e ajusta os donos antes dos outros serviços |
+| `blob` | `chrislusf/seaweedfs:4.52` | **não exposta** (8333 interna) | `${DATA_DIR}/seaweedfs:/data` | `GET :8333/healthz` |
 | `api` | build local | `8080:8080` | `${DATA_DIR}/api/logs:/app/logs` e `${DATA_DIR}/api/tmp:/app/tmp` | `/actuator/health` |
 | `mcp` | — | — | `${DATA_DIR}/mcp/...` quando existir | bloco comentado (WIP) |
-| `frontend` | — | — | `${DATA_DIR}/frontend/...` se tiver estado | bloco comentado (WIP) |
+| `frontend` | build de `../jmc-ai-analyzer-web` (Nginx) | `4200:8080` | `${DATA_DIR}/frontend/logs:/var/log/nginx` | `/healthz` |
 
 - `api` usa `depends_on` com `condition: service_healthy` para `postgres` e `blob`.
 - `.env.example` versionado; `.env` fica no `.gitignore`.
@@ -64,9 +65,12 @@ ${DATA_DIR}/                 # padrão ./docker-data (no .gitignore)
 └── frontend/                # reservado (WIP)
 ```
 
-- **Criação das pastas**: `scripts/init-data-dirs.sh` cria a árvore com as permissões certas antes do primeiro `up`. O usuário não-root da `api` usa `UID/GID` configuráveis (`APP_UID`/`APP_GID`, padrão do usuário do host), para conseguir escrever em `api/`.
+- **Criação das pastas**: o serviço `data-init` cria a árvore a cada `up` e ajusta os donos (API com `APP_UID`/`APP_GID`, logs do Nginx com o UID 101). Não há script para rodar antes.
 - **Permissões do PostgreSQL**: a imagem ajusta o dono de `postgres/` na primeira inicialização. A pasta precisa estar vazia nesse momento.
-- **Configuração**: arquivos de config (`s3.json`) ficam versionados em `./docker/` só como modelo (`s3.json.example`). O real é gerado a partir do `.env`.
+- **Configuração**: o `blob` gera o `s3.json` dentro do container, na inicialização, a partir de `BLOB_ACCESS_KEY`/`BLOB_SECRET_KEY` do `.env` (use letras, números, `-` e `_`). Nenhum arquivo de configuração fica no host.
+
+> [!bug] Por que mudou (2026-11-17)
+> Antes, um script gerava `docker/seaweedfs/s3.json` no host. Quando o `up` rodava sem o script, o Docker criava uma **pasta** no lugar do arquivo e o SeaweedFS não subia (`s3.json: is a directory`).
 - **Backup**: basta copiar `${DATA_DIR}` com os containers parados, ou usar `pg_dump` + cópia de `seaweedfs/`.
 - **Serviços futuros** (`mcp`, `frontend`) seguem a mesma regra: qualquer estado vai para `${DATA_DIR}/<serviço>/`.
 
@@ -83,7 +87,7 @@ ${DATA_DIR}/                 # padrão ./docker-data (no .gitignore)
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://postgres:5432/${POSTGRES_DB}` | datasource |
 | `BLOB_ENDPOINT` | `http://blob:8333` | `app.blob.endpoint` |
 | `BLOB_BUCKET` | `jfr-recordings` | `app.blob.bucket` |
-| `BLOB_ACCESS_KEY` / `BLOB_SECRET_KEY` | — | `app.blob.access-key` / `secret-key` e `s3.json` |
+| `BLOB_ACCESS_KEY` / `BLOB_SECRET_KEY` | — | `app.blob.access-key` / `secret-key` e o `s3.json` gerado no container do blob |
 | `APP_TMP_DIR` | `/app/tmp` | `app.storage.tmp-dir` e `spring.servlet.multipart.location` |
 | `APP_UPLOAD_MAX_FILES` | `20` | `app.upload.max-files` |
 | `APP_UPLOAD_MAX_FILE_SIZE` | `128MB` | `app.upload.max-file-size` e `spring.servlet.multipart.max-file-size` |

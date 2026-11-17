@@ -63,9 +63,9 @@ io.github.maiconthales.jmc_ai_analyzer_api
 │   ├── config         @Configuration: AsyncConfig, BlobStorageConfig, ClockConfig, OpenApiConfig, WebConfig
 │   ├── properties     @ConfigurationProperties: UploadProperties, AnalysisProperties, BlobProperties,
 │   │                  StorageProperties, RetentionProperties, DiagnosisProperties
-│   ├── controllers    AnalysisController, RecordingController, SoftwareController
+│   ├── controllers    AnalysisController, RecordingController, SoftwareController, ConfigController
 │   ├── dto            DTOs HTTP: BatchResponse, RecordingStatusResponse, SoftwareResponse, SoftwareUpdateRequest,
-│   │   │              UploadRequest, HistoryItemResponse, DashboardDtos
+│   │   │              UploadRequest, HistoryItemResponse, DashboardDtos, ConfigResponse
 │   │   ├── jfr        RecordingExtraction, RecordingMetadata, DomainResults, RecordingSettings, ExtractionContext,
 │   │   │              TimedValue, JmcRulesResult, NotApplicableRule
 │   │   ├── diagnosis  DiagnosisContext, DiagnosisOutcome, CoverageResult, CoverageDomainSpec, JmcTranslation
@@ -87,7 +87,8 @@ io.github.maiconthales.jmc_ai_analyzer_api
 │   ├── mapper         BatchMapper, SummaryMapper, DashboardMapper
 │   ├── services       somente *Service (@Service): UploadService, BatchCreationService, BlobStorageService,
 │   │   │              TempFileService, SoftwareService, RecordingStateService, BatchStatusService,
-│   │   │              BatchQueryService, HistoryService, AnalysisProcessingService, AnalysisPersistenceService
+│   │   │              BatchQueryService, HistoryService, AnalysisProcessingService, AnalysisPersistenceService,
+│   │   │              ConfigService
 │   │   ├── dashboard  DashboardService, ConsolidationService
 │   │   └── diagnosis  DiagnosisService, CoverageService
 │   ├── utils          utilitários estáticos, sem estado
@@ -362,15 +363,17 @@ app:
 | Serviço | Imagem | Portas | Bind mounts | Health |
 |---|---|---|---|---|
 | `postgres` | `postgres:17-alpine` | — | `${DATA_DIR}/postgres:/var/lib/postgresql/data` | `pg_isready` |
-| `blob` | `chrislusf/seaweedfs:<fixa>` | — (8333 interna) | `${DATA_DIR}/seaweedfs:/data`, `./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro` | definido em T-02.2 |
+| `data-init` | `alpine:3.22` (roda e termina) | — | `${DATA_DIR}:/data` | cria as pastas e ajusta os donos; os demais dependem dele (`service_completed_successfully`) |
+| `blob` | `chrislusf/seaweedfs:4.52` | — (8333 interna) | `${DATA_DIR}/seaweedfs:/data`; o `s3.json` é gerado em `/tmp` na inicialização a partir de `BLOB_ACCESS_KEY`/`BLOB_SECRET_KEY` | definido em T-02.2 |
 | `api` | build | `8080:8080` | `${DATA_DIR}/api/logs:/app/logs`, `${DATA_DIR}/api/tmp:/app/tmp` | `/actuator/health` |
-| `mcp`, `frontend` | — | — | `${DATA_DIR}/<serviço>/` | blocos comentados (WIP) |
+| `frontend` | build de `${FRONTEND_CONTEXT:-../jmc-ai-analyzer-web}` (Nginx) | `${FRONTEND_PORT:-4200}:8080` | `${DATA_DIR}/frontend/logs:/var/log/nginx` | `/healthz` |
+| `mcp` | — | — | `${DATA_DIR}/mcp/` | bloco comentado (WIP) |
 
 - `api` usa `depends_on` com `condition: service_healthy` para `postgres` e `blob`, e limite de memória `${API_MEMORY_LIMIT:-3g}`.
 - **Sem *named volumes*.** `docker-data/` e `.env` ficam no `.gitignore`.
 - `docker-compose.debug.yml` (opcional) expõe 5432 e 8333 em `127.0.0.1`.
-- `scripts/init-data-dirs.sh` cria a árvore de `${DATA_DIR}` com as permissões certas.
-- `scripts/render-s3-config.sh` gera `docker/seaweedfs/s3.json` a partir do `.env`; o repositório versiona só o `s3.json.example`.
+- Nenhum script prévio: `data-init` cria a árvore de `${DATA_DIR}` (API com `APP_UID`/`APP_GID`, logs do Nginx com o UID 101) e o `blob` gera o `s3.json` dentro do container.
+- Motivo (2026-11-17): o bind mount de um `s3.json` inexistente fazia o Docker criar uma pasta no lugar e o SeaweedFS não subia.
 - Logs da API em `/app/logs` (logback com rotação diária, 14 dias) e também no stdout.
 
 ### 8.3. Variáveis de ambiente (`.env.example`)

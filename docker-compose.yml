@@ -1,17 +1,36 @@
 # Todos os dados ficam em ${DATA_DIR} na máquina real (bind mounts). Não há named volumes:
 # reiniciar, recriar ou rodar "docker compose down -v" não apaga nada.
-# Antes do primeiro "up": ./scripts/init-data-dirs.sh
+# Basta "cp .env.example .env" (trocando os "change-me") e "docker compose up -d --build":
+# o serviço data-init prepara as pastas e o blob gera a própria configuração S3.
 
 name: jmc-ai-analyzer
 
 services:
+  # Cria as pastas de dados no host com o dono certo (roda uma vez a cada "up" e termina).
+  data-init:
+    image: alpine:3.22
+    user: "0:0"
+    restart: "no"
+    command:
+      - sh
+      - -c
+      - >-
+        mkdir -p /data/postgres /data/seaweedfs /data/api/logs /data/api/tmp /data/frontend/logs /data/mcp
+        && chown -R ${APP_UID:-1000}:${APP_GID:-1000} /data/api
+        && chown -R 101:101 /data/frontend/logs
+    volumes:
+      - ${DATA_DIR:-./docker-data}:/data
+
   postgres:
     image: postgres:17-alpine
     restart: unless-stopped
+    depends_on:
+      data-init:
+        condition: service_completed_successfully
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-jmc_analyzer}
       POSTGRES_USER: ${POSTGRES_USER:-jmc}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
       - ${DATA_DIR:-./docker-data}/postgres:/var/lib/postgresql/data
     healthcheck:
@@ -23,10 +42,22 @@ services:
   blob:
     image: chrislusf/seaweedfs:4.52
     restart: unless-stopped
-    command: ["server", "-s3", "-dir=/data", "-s3.config=/etc/seaweedfs/s3.json", "-ip.bind=0.0.0.0"]
+    depends_on:
+      data-init:
+        condition: service_completed_successfully
+    environment:
+      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY:?defina BLOB_ACCESS_KEY no .env}
+      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY:?defina BLOB_SECRET_KEY no .env}
+    # Gera a configuração S3 (credenciais) a partir do .env na inicialização: nenhum arquivo no host.
+    # Use apenas letras, números, "-" e "_" nas chaves.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        printf '{"identities":[{"name":"api","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}'
+        "$$BLOB_ACCESS_KEY" "$$BLOB_SECRET_KEY" > /tmp/s3.json
+        && exec /entrypoint.sh server -s3 -dir=/data -s3.config=/tmp/s3.json -ip.bind=0.0.0.0
     volumes:
       - ${DATA_DIR:-./docker-data}/seaweedfs:/data
-      - ./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
       interval: 5s
@@ -42,6 +73,8 @@ services:
     image: jmc-ai-analyzer-api:0.1.0
     restart: unless-stopped
     depends_on:
+      data-init:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       blob:
@@ -72,14 +105,27 @@ services:
         limits:
           memory: ${API_MEMORY_LIMIT:-3g}
 
-  # --- Futuro (WIP): seguem a mesma regra, qualquer estado em ${DATA_DIR}/<serviço>/ ---
+  frontend:
+    build:
+      context: ${FRONTEND_CONTEXT:-../jmc-ai-analyzer-web}
+    image: jmc-ai-analyzer-web:0.1.0
+    restart: unless-stopped
+    depends_on:
+      data-init:
+        condition: service_completed_successfully
+      api:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-4200}:8080"
+    environment:
+      API_UPSTREAM: http://api:8080
+      POLLING_INTERVAL_MS: ${FRONTEND_POLLING_INTERVAL_MS:-2000}
+    volumes:
+      - ${DATA_DIR:-./docker-data}/frontend/logs:/var/log/nginx
+
+  # --- Futuro (WIP): segue a mesma regra, qualquer estado em ${DATA_DIR}/<serviço>/ ---
   # mcp:
   #   image: jmc-ai-analyzer-mcp:<versão>
   #   depends_on: [api]
   #   volumes:
   #     - ${DATA_DIR:-./docker-data}/mcp:/data
-  # frontend:
-  #   image: jmc-ai-analyzer-frontend:<versão>
-  #   depends_on: [api]
-  #   ports:
-  #     - "${FRONTEND_PORT:-4200}:80"

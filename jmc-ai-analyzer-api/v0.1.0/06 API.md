@@ -20,6 +20,7 @@ Voltar: [[00 Índice]] · Requisitos: [[03 Requisitos]]
 | `GET` | `/api/v1/software` | Lista de softwares, com retenção e último lote | [[03 Requisitos#RF-11 — Software e retenção\|RF-11]] |
 | `PATCH` | `/api/v1/software/{name}` | Altera `retentionDays` e `appPackages` | [[03 Requisitos#RF-11 — Software e retenção\|RF-11]] |
 | `GET` | `/actuator/health` | Saúde | [[03 Requisitos#RF-09 — Health check\|RF-09]] |
+| `GET` | `/api/v1/config` | Limites de upload, top-N e retenção (para o front) | — |
 | `GET` | `/swagger-ui.html` · `/v3/api-docs` | Swagger | [[03 Requisitos#RF-12 — Documentação da API (Swagger)\|RF-12]] |
 
 ## POST /api/v1/analyses

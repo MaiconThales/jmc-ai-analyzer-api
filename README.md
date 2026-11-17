@@ -11,14 +11,14 @@ Java 17 · Spring Boot 4.1.2 · PostgreSQL 17 · Flyway · JMC core 9.1.2 · Sea
 
 ## Subir com Docker
 
-Todos os dados ficam em `DATA_DIR` (padrão `./docker-data`) na máquina real. Não há volumes nomeados: `docker compose down -v` não apaga nada.
+Todos os dados ficam em `DATA_DIR` (padrão `./docker-data`) na máquina real. Não há volumes nomeados: `docker compose down -v` não apaga nada. O serviço `data-init` cria as pastas com o dono certo a cada `up`, e o `blob` gera a própria configuração S3 a partir do `.env`: não há script para rodar antes.
 
 ```bash
-cp .env.example .env        # troque os valores "change-me"
-./scripts/init-data-dirs.sh # cria as pastas e gera docker/seaweedfs/s3.json
+cp .env.example .env        # troque os valores "change-me" (chaves do blob: letras, números, - e _)
 docker compose up -d --build
 ```
 
+- Front-end: http://localhost:4200 (serviço `frontend`, construído a partir de `../jmc-ai-analyzer-web`; mude com `FRONTEND_CONTEXT`)
 - API: http://localhost:8080
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Saúde: http://localhost:8080/actuator/health
@@ -50,6 +50,7 @@ curl -F software=billing-service -F environment=PROD -F "description=lentidão �
 | `GET` | `/api/v1/analyses/{batchId}/dashboard?topN=10` | Dashboard consolidado |
 | `GET` | `/api/v1/recordings/{recordingId}/dashboard?topN=10` | Dashboard da gravação |
 | `GET` / `PATCH` | `/api/v1/software` · `/api/v1/software/{name}` | Retenção e pacotes da aplicação |
+| `GET` | `/api/v1/config` | Limites de upload, top-N e retenção (usado pelo front) |
 
 Defina os pacotes do seu código (`PATCH /api/v1/software/{name}` com `{"appPackages":["com.empresa"]}`) para que o dashboard aponte o primeiro frame da aplicação (`appFrame`) em cada problema.
 

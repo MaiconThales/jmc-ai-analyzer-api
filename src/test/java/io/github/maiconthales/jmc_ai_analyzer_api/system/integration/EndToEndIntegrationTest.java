@@ -237,7 +237,14 @@ class EndToEndIntegrationTest {
 		JsonNode docs = getJson("/v3/api-docs");
 		assertThat(docs.get("paths").propertyNames()).contains("/api/v1/analyses", "/api/v1/analyses/{batchId}",
 				"/api/v1/analyses/{batchId}/dashboard", "/api/v1/recordings/{recordingId}/dashboard",
-				"/api/v1/software", "/api/v1/software/{name}");
+				"/api/v1/software", "/api/v1/software/{name}", "/api/v1/config");
+		mvc.perform(get("/api/v1/config")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.upload.maxFiles").value(5))
+				.andExpect(jsonPath("$.upload.maxFileSizeBytes").value(128L * 1024 * 1024))
+				.andExpect(jsonPath("$.upload.maxRequestSizeBytes").value(1024L * 1024 * 1024))
+				.andExpect(jsonPath("$.upload.allowedExtension").value(".jfr"))
+				.andExpect(jsonPath("$.dashboard.maxTopN").value(50))
+				.andExpect(jsonPath("$.retention.defaultDays").value(90));
 		mvc.perform(get("/actuator/health")).andExpect(status().isOk())
 				.andExpect(jsonPath("$.components.blobStorage.status").value("UP"))
 				.andExpect(jsonPath("$.components.db.status").value("UP"));

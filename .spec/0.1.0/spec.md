@@ -303,6 +303,21 @@ Para cada domínio (`CPU`, `HEAP`, `GC`, `THREADS`, `LOCKS`, `HOT_METHODS`, `ALL
 - Se nenhum frame satisfizer a regra, `appFrame` é nulo.
 - O cálculo é feito **na consulta**, então mudar `appPackages` vale também para análises antigas.
 
+
+### RF-16 — Configuração pública
+
+`GET /api/v1/config` devolve os limites configurados, para o front validar antes de enviar sem duplicar a configuração:
+
+```json
+{
+  "upload": { "maxFiles": 20, "maxFileSizeBytes": 134217728, "maxRequestSizeBytes": 1073741824, "allowedExtension": ".jfr" },
+  "dashboard": { "defaultTopN": 10, "maxTopN": 50 },
+  "retention": { "defaultDays": 90 }
+}
+```
+
+Os valores vêm de `app.upload.*`, `app.analysis.*` e `app.retention.*`; mudar a configuração da API muda o que o front valida.
+
 ---
 
 ## 5. Requisitos não funcionais
@@ -445,3 +460,4 @@ Mesmos blocos de §6.3, com as regras de RF-06, mais:
 | CA-16 | `environment` e `description` aparecem no status do lote e no histórico. | RF-07, RF-08 |
 | CA-17 | Nenhuma variável de ambiente, propriedade de sistema ou processo do `.jfr` aparece no banco ou na API. | RNF-10 |
 | CA-18 | Processar duas vezes o mesmo `.jfr` gera resultados idênticos. | RNF-11 |
+| CA-19 | `GET /api/v1/config` devolve os limites configurados (upload, top-N e retenção). | RF-16 |

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "2327261feb16f49e",
+        "id": "da8f23859ac4cb55",
         "type": "tabs",
         "children": [
           {
-            "id": "a56689f3822d9e48",
+            "id": "6c014a0e2260d23c",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -95,6 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "v0.1.0/00 Índice.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "v0.1.0/00 Índice.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "v0.1.0/00 Índice.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -181,7 +184,7 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "a56689f3822d9e48",
+  "active": "d1f8524aca948582",
   "lastOpenFiles": [
     "v0.1.0/sedJxpVnO",
     "v0.1.0/sedb3DMTE",

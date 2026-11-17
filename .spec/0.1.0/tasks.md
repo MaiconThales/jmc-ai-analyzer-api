@@ -197,7 +197,7 @@ flowchart LR
 - [x] **T-12.1 — `Dockerfile`** multi-stage (plan §8.1).
   - **Dep**: T-08.2 · **Pronto quando**: `docker build` gera a imagem e o `HEALTHCHECK` fica `healthy`.
 - [x] **T-12.2 — `docker-compose.yml`** com bind mounts, health checks, limite de memória e blocos `mcp`/`frontend` comentados.
-  - `docker-compose.debug.yml`, `scripts/init-data-dirs.sh` e `scripts/render-s3-config.sh`.
+  - `docker-compose.debug.yml` e o serviço `data-init` (substituiu os scripts de preparação; ver plan §8.2).
   - **Dep**: T-12.1, T-02.2 · **Pronto quando**: `docker compose up` deixa os 3 serviços `healthy` (RNF-07).
 - [x] **T-12.3 — Teste de persistência no host**: subir, enviar um exemplo, `docker compose down -v`, `up` e consultar.
   - **Dep**: T-12.2 · **Pronto quando**: CA-06 (roteiro documentado no README).
@@ -214,6 +214,11 @@ flowchart LR
   - **Dep**: todas · **Pronto quando**: checklist abaixo completo.
 
 ---
+
+## E14 — Configuração pública (pedido do front)
+
+- [x] **T-14.1 — `GET /api/v1/config`** (RF-16): `ConfigController`, `ConfigService` e `ConfigResponse`.
+  - **Dep**: E05 · **Pronto quando**: CA-19 (teste de integração).
 
 ## Situação da implementação (2026-11-17)
 
@@ -243,6 +248,7 @@ flowchart LR
 | CA-16 | T-09.4, T-09.5 |
 | CA-17 | T-13.1 |
 | CA-18 | T-06.6, T-13.1 |
+| CA-19 | T-14.1 |
 
 ## Fora desta versão (v0.2.0)
 

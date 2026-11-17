@@ -20,7 +20,7 @@ public class UploadValidator {
 	static final Pattern SOFTWARE = Pattern.compile("^[a-z0-9][a-z0-9-]{1,63}$");
 	static final int MAX_VERSION = 64;
 	static final int MAX_DESCRIPTION = 500;
-	static final String EXTENSION = ".jfr";
+	public static final String EXTENSION = ".jfr";
 
 	private final UploadProperties properties;
 

@@ -31,9 +31,11 @@
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/config/OpenApiConfig.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/config/WebConfig.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/controllers/AnalysisController.java
+/home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/controllers/ConfigController.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/controllers/RecordingController.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/controllers/SoftwareController.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/dto/BatchResponse.java
+/home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/dto/ConfigResponse.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/dto/DashboardDtos.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/dto/HistoryItemResponse.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/dto/RecordingStatusResponse.java
@@ -131,6 +133,7 @@
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/BatchQueryService.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/BatchStatusService.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/BlobStorageService.java
+/home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/ConfigService.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/HistoryService.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/RecordingStateService.java
 /home/maicon/Development/Projects/jmc-ai-analyzer-api/src/main/java/io/github/maiconthales/jmc_ai_analyzer_api/system/services/SoftwareService.java
