@@ -19,7 +19,7 @@ services:
         && chown -R ${APP_UID:-1000}:${APP_GID:-1000} /data/api
         && chown -R 101:101 /data/frontend/logs
     volumes:
-      - ${DATA_DIR:-./docker-data}:/data
+      - ${DATA_DIR}:/data
 
   postgres:
     image: postgres:17-alpine
@@ -28,11 +28,11 @@ services:
       data-init:
         condition: service_completed_successfully
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-jmc_analyzer}
-      POSTGRES_USER: ${POSTGRES_USER:-jmc}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ${DATA_DIR:-./docker-data}/postgres:/var/lib/postgresql/data
+      - ${DATA_DIR}/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -46,8 +46,8 @@ services:
       data-init:
         condition: service_completed_successfully
     environment:
-      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY:?defina BLOB_ACCESS_KEY no .env}
-      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY:?defina BLOB_SECRET_KEY no .env}
+      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY}
+      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY}
     # Gera a configuração S3 (credenciais) a partir do .env na inicialização: nenhum arquivo no host.
     # Use apenas letras, números, "-" e "_" nas chaves.
     entrypoint: ["/bin/sh", "-c"]
@@ -57,7 +57,7 @@ services:
         "$$BLOB_ACCESS_KEY" "$$BLOB_SECRET_KEY" > /tmp/s3.json
         && exec /entrypoint.sh server -s3 -dir=/data -s3.config=/tmp/s3.json -ip.bind=0.0.0.0
     volumes:
-      - ${DATA_DIR:-./docker-data}/seaweedfs:/data
+      - ${DATA_DIR}/seaweedfs:/data
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
       interval: 5s
@@ -68,8 +68,8 @@ services:
     build:
       context: .
       args:
-        APP_UID: ${APP_UID:-1000}
-        APP_GID: ${APP_GID:-1000}
+        APP_UID: ${APP_UID}
+        APP_GID: ${APP_GID}
     image: jmc-ai-analyzer-api:0.1.0
     restart: unless-stopped
     depends_on:
@@ -82,32 +82,32 @@ services:
     ports:
       - "${API_PORT:-8080}:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-jmc_analyzer}
-      POSTGRES_USER: ${POSTGRES_USER:-jmc}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       BLOB_ENDPOINT: http://blob:8333
-      BLOB_BUCKET: ${BLOB_BUCKET:-jfr-recordings}
-      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY:?defina BLOB_ACCESS_KEY no .env}
-      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY:?defina BLOB_SECRET_KEY no .env}
-      APP_UPLOAD_MAX_FILES: ${APP_UPLOAD_MAX_FILES:-20}
-      APP_UPLOAD_MAX_FILE_SIZE: ${APP_UPLOAD_MAX_FILE_SIZE:-128MB}
-      APP_UPLOAD_MAX_REQUEST_SIZE: ${APP_UPLOAD_MAX_REQUEST_SIZE:-1GB}
-      APP_ANALYSIS_MAX_CONCURRENT: ${APP_ANALYSIS_MAX_CONCURRENT:-2}
-      APP_ANALYSIS_TIMEOUT: ${APP_ANALYSIS_TIMEOUT:-10m}
-      APP_RETENTION_DEFAULT_DAYS: ${APP_RETENTION_DEFAULT_DAYS:-90}
-      APP_RETENTION_CRON: ${APP_RETENTION_CRON:-0 0 3 * * *}
-      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+      BLOB_BUCKET: ${BLOB_BUCKET}
+      BLOB_ACCESS_KEY: ${BLOB_ACCESS_KEY}
+      BLOB_SECRET_KEY: ${BLOB_SECRET_KEY}
+      APP_UPLOAD_MAX_FILES: ${APP_UPLOAD_MAX_FILES}
+      APP_UPLOAD_MAX_FILE_SIZE: ${APP_UPLOAD_MAX_FILE_SIZE}
+      APP_UPLOAD_MAX_REQUEST_SIZE: ${APP_UPLOAD_MAX_REQUEST_SIZE}
+      APP_ANALYSIS_MAX_CONCURRENT: ${APP_ANALYSIS_MAX_CONCURRENT}
+      APP_ANALYSIS_TIMEOUT: ${APP_ANALYSIS_TIMEOUT}
+      APP_RETENTION_DEFAULT_DAYS: ${APP_RETENTION_DEFAULT_DAYS}
+      APP_RETENTION_CRON: ${APP_RETENTION_CRON}
+      JAVA_OPTS: ${JAVA_OPTS}
     volumes:
-      - ${DATA_DIR:-./docker-data}/api/logs:/app/logs
-      - ${DATA_DIR:-./docker-data}/api/tmp:/app/tmp
+      - ${DATA_DIR}/api/logs:/app/logs
+      - ${DATA_DIR}/api/tmp:/app/tmp
     deploy:
       resources:
         limits:
-          memory: ${API_MEMORY_LIMIT:-3g}
+          memory: ${API_MEMORY_LIMIT}
 
   frontend:
     build:
-      context: ${FRONTEND_CONTEXT:-../jmc-ai-analyzer-web}
+      context: ${FRONTEND_CONTEXT}
     image: jmc-ai-analyzer-web:0.1.0
     restart: unless-stopped
     depends_on:
@@ -119,9 +119,9 @@ services:
       - "${FRONTEND_PORT:-4200}:8080"
     environment:
       API_UPSTREAM: http://api:8080
-      POLLING_INTERVAL_MS: ${FRONTEND_POLLING_INTERVAL_MS:-2000}
+      POLLING_INTERVAL_MS: ${FRONTEND_POLLING_INTERVAL_MS}
     volumes:
-      - ${DATA_DIR:-./docker-data}/frontend/logs:/var/log/nginx
+      - ${DATA_DIR}/frontend/logs:/var/log/nginx
 
   # --- Futuro (WIP): segue a mesma regra, qualquer estado em ${DATA_DIR}/<serviço>/ ---
   # mcp:

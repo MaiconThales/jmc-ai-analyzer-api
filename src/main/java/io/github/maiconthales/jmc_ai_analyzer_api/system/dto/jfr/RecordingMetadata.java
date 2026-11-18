@@ -2,22 +2,28 @@ package io.github.maiconthales.jmc_ai_analyzer_api.system.dto.jfr;
 
 import java.time.Instant;
 
-/** Metadados da gravação e do ambiente que a gerou. */
+/**
+ * Metadados da gravação e do ambiente que a gerou.
+ */
 public record RecordingMetadata(
-		Instant start,
-		Instant end,
-		long durationMs,
-		long eventCount,
-		String jvmName,
-		String jvmVersion,
-		String jvmArgs,
-		String javaArgs,
-		String osName,
-		Integer cpuCores,
-		Integer hardwareThreads,
-		Long physicalMemoryBytes) {
+        Instant start,
+        Instant end,
+        long durationMs,
+        long eventCount,
+        String jvmName,
+        String jvmVersion,
+        String jvmArgs,
+        String javaArgs,
+        String osName,
+        Integer cpuCores,
+        Integer hardwareThreads,
+        Long physicalMemoryBytes) {
 
-	public double durationSeconds() {
-		return durationMs / 1000.0;
-	}
+    public double durationSeconds() {
+        return durationMs / 1000.0;
+    }
+
+    public static RecordingMetadata empty() {
+        return new RecordingMetadata(null, null, 0, 0, null, null, null, null, null, null, null, null);
+    }
 }

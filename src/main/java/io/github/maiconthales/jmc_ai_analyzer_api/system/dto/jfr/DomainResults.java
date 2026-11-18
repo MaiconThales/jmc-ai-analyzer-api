@@ -1,69 +1,104 @@
 package io.github.maiconthales.jmc_ai_analyzer_api.system.dto.jfr;
 
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.AllocationHotspot;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.ExceptionHotspot;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.GcPause;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.HotMethod;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.IoHotspot;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.LeakSuspect;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.LockContention;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.MetricSample;
-import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.ThreadCpu;
+import io.github.maiconthales.jmc_ai_analyzer_api.system.entity.*;
 import io.github.maiconthales.jmc_ai_analyzer_api.system.enums.IoType;
+
 import java.util.List;
 import java.util.Map;
 
-/** Resultados de cada extrator. {@code available = false} significa que a gravação não tinha os eventos. */
+/**
+ * Resultados de cada extrator. {@code available = false} significa que a gravação não tinha os eventos.
+ */
 public final class DomainResults {
 
-	private DomainResults() {
-	}
+    private DomainResults() {
+    }
 
-	public record Cpu(boolean available, Double jvmAvg, Double jvmMax, Double machineAvg, Double machineMax,
-			List<MetricSample> series, List<Double> machineValues) {
+    public record Cpu(boolean available, Double jvmAvg, Double jvmMax, Double machineAvg, Double machineMax,
+                      List<MetricSample> series, List<Double> machineValues) {
 
-		public static Cpu empty() {
-			return new Cpu(false, null, null, null, null, List.of(), List.of());
-		}
-	}
+        public static Cpu empty() {
+            return new Cpu(false, null, null, null, null, List.of(), List.of());
+        }
+    }
 
-	public record Heap(boolean available, Long initialBytes, Long maxBytes, Long usedPeakBytes, String youngCollector,
-			String oldCollector, Long parallelGcThreads, List<MetricSample> series) {
-	}
+    public record Heap(boolean available, Long initialBytes, Long maxBytes, Long usedPeakBytes, String youngCollector,
+                       String oldCollector, Long parallelGcThreads, List<MetricSample> series) {
 
-	public record Gc(boolean available, int count, double pauseTotalMs, double pauseAvgMs, double pauseP95Ms,
-			double pauseMaxMs, double pausePct, List<GcPause> topPauses) {
+        public static Heap empty() {
+            return new Heap(false, null, null, null, null, null, null, List.of());
+        }
+    }
 
-		public static Gc empty() {
-			return new Gc(false, 0, 0, 0, 0, 0, 0, List.of());
-		}
-	}
+    public record Gc(boolean available, int count, double pauseTotalMs, double pauseAvgMs, double pauseP95Ms,
+                     double pauseMaxMs, double pausePct, List<GcPause> topPauses) {
 
-	public record Threads(boolean available, Integer peak, Integer daemonPeak, int started, int ended,
-			List<MetricSample> series, List<Double> activeValues) {
-	}
+        public static Gc empty() {
+            return new Gc(false, 0, 0, 0, 0, 0, 0, List.of());
+        }
+    }
 
-	public record Locks(boolean available, List<LockContention> top) {
-	}
+    public record Threads(boolean available, Integer peak, Integer daemonPeak, int started, int ended,
+                          List<MetricSample> series, List<Double> activeValues) {
 
-	public record HotMethods(boolean available, long totalSamples, List<HotMethod> top) {
-	}
+        public static Threads empty() {
+            return new Threads(false, null, null, 0, 0, List.of(), List.of());
+        }
+    }
 
-	public record Allocation(boolean available, Double rateBytesPerSecond, List<AllocationHotspot> top) {
-	}
+    public record Locks(boolean available, List<LockContention> top) {
 
-	public record Exceptions(boolean available, Long throwablesTotal, List<ExceptionHotspot> top) {
-	}
+        public static Locks empty() {
+            return new Locks(false, List.of());
+        }
+    }
 
-	public record IoTotal(long bytes, long count, double totalMs) {
-	}
+    public record HotMethods(boolean available, long totalSamples, List<HotMethod> top) {
+        
+        public static HotMethods empty() {
+            return new HotMethods(false, 0, List.of());
+        }
+    }
 
-	public record Io(boolean available, Map<IoType, IoTotal> totals, List<IoHotspot> top) {
-	}
+    public record Allocation(boolean available, Double rateBytesPerSecond, List<AllocationHotspot> top) {
 
-	public record Leaks(boolean available, List<LeakSuspect> top) {
-	}
+        public static Allocation empty() {
+            return new Allocation(false, null, List.of());
+        }
+    }
 
-	public record ThreadCpuLoad(boolean available, List<ThreadCpu> top) {
-	}
+    public record Exceptions(boolean available, Long throwablesTotal, List<ExceptionHotspot> top) {
+
+        public static Exceptions empty() {
+            return new Exceptions(false, null, List.of());
+        }
+    }
+
+    public record IoTotal(long bytes, long count, double totalMs) {
+
+        public static IoTotal empty() {
+            return new IoTotal(0, 0, 0);
+        }
+    }
+
+    public record Io(boolean available, Map<IoType, IoTotal> totals, List<IoHotspot> top) {
+
+        public static Io empty() {
+            return new Io(false, Map.of(), List.of());
+        }
+    }
+
+    public record Leaks(boolean available, List<LeakSuspect> top) {
+
+        public static Leaks empty() {
+            return new Leaks(false, List.of());
+        }
+    }
+
+    public record ThreadCpuLoad(boolean available, List<ThreadCpu> top) {
+
+        public static ThreadCpuLoad empty() {
+            return new ThreadCpuLoad(false, List.of());
+        }
+    }
 }

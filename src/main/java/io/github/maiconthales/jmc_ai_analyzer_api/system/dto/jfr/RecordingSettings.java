@@ -8,16 +8,20 @@ import java.util.Optional;
  */
 public record RecordingSettings(Map<String, Map<String, String>> byEventType) {
 
-	public Optional<String> value(String eventType, String setting) {
-		return Optional.ofNullable(byEventType.get(eventType)).map(s -> s.get(setting));
-	}
+    public Optional<String> value(String eventType, String setting) {
+        return Optional.ofNullable(byEventType.get(eventType)).map(s -> s.get(setting));
+    }
 
-	/**
-	 * Indica se o evento estava habilitado.
-	 *
-	 * @return vazio quando a gravação não informa a configuração do evento
-	 */
-	public Optional<Boolean> enabled(String eventType) {
-		return value(eventType, "enabled").map(Boolean::parseBoolean);
-	}
+    /**
+     * Indica se o evento estava habilitado.
+     *
+     * @return vazio quando a gravação não informa a configuração do evento
+     */
+    public Optional<Boolean> enabled(String eventType) {
+        return value(eventType, "enabled").map(Boolean::parseBoolean);
+    }
+
+    public static RecordingSettings empty() {
+        return new RecordingSettings(Map.of());
+    }
 }
